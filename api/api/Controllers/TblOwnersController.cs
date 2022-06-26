@@ -31,6 +31,7 @@ namespace api.Controllers
             return await _context.TblOwners.ToListAsync();
         }
 
+
         // GET: api/TblOwners/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TblOwner>> GetTblOwner(int id)
@@ -85,29 +86,37 @@ namespace api.Controllers
         [HttpPost]
         public async Task<ActionResult<TblOwner>> PostTblOwner(TblOwner tblOwner)
         {
-          if (_context.TblOwners == null)
-          {
-              return Problem("Entity set 'practiceContext.TblOwners'  is null.");
-          }
-            _context.TblOwners.Add(tblOwner);
-            try
+
+            var temp = _context.TblOwners
+                .Where(x => x.Surname == tblOwner.Surname
+                && x.Firstname == tblOwner.Firstname && x.Phone == tblOwner.Phone && x.Username == tblOwner.Username
+                && x.Password == tblOwner.Password && x.Admin == tblOwner.Admin)
+                .FirstOrDefault();
+
+            if (temp == null)
             {
+                _context.TblOwners.Add(tblOwner);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException)
-            {
-                if (TblOwnerExists(tblOwner.Ownerid))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            else
+                tblOwner = temp;
 
-            return CreatedAtAction("GetTblOwner", new { id = tblOwner.Ownerid }, tblOwner);
+            return Ok(tblOwner);
         }
+
+        // [HttpPost]
+        // public async Task<ActionResult<TblOwner>> Login(TblOwner tblOwner)
+        // {
+        //     var temp = _context.TblOwners
+        //         .Where(x => x.Username == tblOwner.Username
+        //         && x.Password == tblOwner.Password)
+        //         .FirstOrDefault();
+        //     if (TblOwner.Username != tblOwner.Username)
+        //     {
+        //         return BadRequest("User not found.");
+        //     }
+        //     return Ok("User Logged In");
+        // }
 
         // DELETE: api/TblOwners/5
         [HttpDelete("{id}")]
@@ -133,5 +142,72 @@ namespace api.Controllers
         {
             return (_context.TblOwners?.Any(e => e.Ownerid == id)).GetValueOrDefault();
         }
+
+    [HttpGet("get-user")]
+    public async Task<ActionResult<List<UserView?>>> ViewUsers()
+    {
+        
+        try
+        {
+            var sub = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            var users = await _context.view_User.ToListAsync();
+
+            return Ok(users);
+
+        }
+        catch (Exception ex)
+        {
+
+            return StatusCode(500, ex.ToString());
+        }
+
+    }
+
+    [HttpGet("Login/{username}/{password}")]
+    public async Task<ActionResult<List<UserValidation?>>> ValidateUser()
+    {
+        
+        try
+        {
+            var inputUsername = Convert.ToString(RouteData.Values["username"]);
+            var inputPassword = Convert.ToString(RouteData.Values["password"]);
+
+            var usernameArray = new List<string> { inputUsername };
+
+            var userValidationObject = await _context.view_User
+            .Where(t => usernameArray.Contains(t.Username)).ToListAsync();
+
+            var userValid = false;
+            var adminStatus = false;
+
+            if(userValidationObject[0].Username == (inputUsername) && userValidationObject[0].Password == (inputPassword) && userValidationObject[0].Admin == false)
+            {
+                userValid = true;
+                adminStatus = false;
+            return Ok (new {userValid, adminStatus, userValidationObject[0].Ownerid});
+            }
+            else if(userValidationObject[0].Username == (inputUsername) && userValidationObject[0].Password == (inputPassword) && userValidationObject[0].Admin == true)
+            {
+                userValid = true;
+                adminStatus = true;
+            return Ok (new {userValid, adminStatus, userValidationObject[0].Ownerid});
+            }
+
+            else
+            {
+                userValid = false;
+                adminStatus = false;
+                return Ok (new {userValid, adminStatus});
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            return StatusCode(500, ex.ToString());
+        }
+
+    }
     }
 }

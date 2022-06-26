@@ -25,13 +25,13 @@ export default function Entry() {
                               variant="contained"
                               size="large"
                               sx={{ width: '90%', m: 2 }}
-                              onClick={() => navigate('login')}>Log In</Button>
+                              onClick={() => navigate('/login')}>Log In</Button>
                         <Button
                               type="submit"
                               variant="contained"
                               size="large"
                               sx={{ width: '90%'}}
-                              onClick={() => navigate('signup')}>Sign Up</Button>  
+                              onClick={() => navigate('/signup')}>Sign Up</Button>  
                   </Box>
               </CardContent>
           </Card>
