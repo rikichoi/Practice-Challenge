@@ -39,6 +39,9 @@ const Home = () => {
 
 
   const [pets, setPets] = useState([]);
+
+  const [procedures, setProcedures] = useState([]);
+
   const [updated, setUpdated] = useState(false);
 
 
@@ -49,6 +52,14 @@ const Home = () => {
       }
       )
   }, [userID, updated]);
+
+  useEffect(() => {
+    axios.get(`https://localhost:7162/api/TblProcedures`)
+      .then(resp => {
+        setProcedures(resp.data);
+      }
+      )
+  }, [userID]);
 
   const [toggle, setToggle] = useState(false);
 
@@ -182,6 +193,17 @@ const Home = () => {
             <Typography variant="h5" sx={{ my: 3 }}>
               Offered Procedures
             </Typography>
+          </CardContent>
+          <CardContent sx={{ textAlign: 'left' }}>
+            {procedures.map(procedures => {
+              return (
+                <div className='post'>
+                  <h3>Procedure ID: {procedures.procedureid}</h3>
+                  <p>Description: {procedures.description}</p>
+                  <p>Price: {procedures.price}$</p>
+                </div>
+              )
+            })}
           </CardContent>
         </Card>
       </Center>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace api.Models
 {
@@ -13,6 +14,7 @@ namespace api.Models
         public int Procedureid { get; set; }
         public string? Description { get; set; }
         public decimal? Price { get; set; }
+        [JsonIgnore]
 
         public virtual ICollection<TblTreatment> TblTreatments { get; set; }
     }
