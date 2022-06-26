@@ -92,7 +92,7 @@ namespace api.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
         [HttpPost]
-        public async Task<ActionResult<List<TblPet>>> AddHero(TblPet pet)
+        public async Task<ActionResult<List<TblPet>>> AddPet(TblPet pet)
         {
             _context.TblPets.Add(pet);
             await _context.SaveChangesAsync();
@@ -101,23 +101,20 @@ namespace api.Controllers
         }
 
         // DELETE: api/TblPets/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTblPet(string id)
+        [HttpDelete("{petname}/{ownerid}")]
+        public async Task<ActionResult<List<TblPet>>> DeletePet(string petname, int ownerid)
         {
-            if (_context.TblPets == null)
-            {
-                return NotFound();
-            }
-            var tblPet = await _context.TblPets.FindAsync(id);
-            if (tblPet == null)
-            {
-                return NotFound();
-            }
+            var inputPet = Convert.ToString(RouteData.Values["petname"]);
+            var inputOwner = Convert.ToInt32(RouteData.Values["ownerid"]);
 
-            _context.TblPets.Remove(tblPet);
+            var dbPet = await _context.TblPets.FindAsync(inputPet, inputOwner);
+            if (dbPet == null)
+                return BadRequest("Pet not found.");
+
+            _context.TblPets.Remove(dbPet);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(await _context.TblPets.ToListAsync());
         }
 
         private bool TblPetExists(string id)
