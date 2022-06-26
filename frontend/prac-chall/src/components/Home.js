@@ -10,13 +10,15 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Center from './Center'
+import Center from './Center';
 import { LoginContext } from '../helper/Context';
-import { useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { DataGrid } from '@mui/x-data-grid';
 
 const Home = () => {
 
-  const {userID, setUserID} = useContext(LoginContext);
+  const { userID, setUserID } = useContext(LoginContext);
 
   const navigate = useNavigate();
 
@@ -30,9 +32,22 @@ const Home = () => {
     setAnchorElUser(null);
   };
 
+  const handleLogout = () => {
+    setUserID(0);
+    navigate(`/`)
+  };
 
 
+  const [pets, setPets] = useState([]);
 
+
+  useEffect(() => {
+    axios.get(`https://localhost:7162/api/TblPets/Pets/${userID}`)
+      .then(resp => {
+        setPets(resp.data.ownerPetsObject);
+      }
+      )
+  }, [userID]);
 
   return (
     <>
@@ -56,34 +71,6 @@ const Home = () => {
               PRACTICE CHALLENGE
             </Typography>
 
-
-            <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'flex' } }}>
-              <Button
-                onClick={() => navigate(`/pets`)}
-                sx={{ m: 2, color: 'white', display: 'block' }}
-              >
-                PETS
-              </Button>
-            </Box>
-
-            <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'flex' } }}>
-              <Button
-                onClick={() => navigate(`/treatments`)}
-                sx={{ m: 2, color: 'white', display: 'block' }}
-              >
-                TREATMENTS
-              </Button>
-            </Box>
-
-            <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'flex' } }}>
-              <Button
-                onClick={() => navigate(`/procedures`)}
-                sx={{ m: 2, color: 'white', display: 'block' }}
-              >
-                PROCEDURES
-              </Button>
-            </Box>
-
             <Box sx={{ flexGrow: 0, marginLeft: 'auto' }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -106,7 +93,7 @@ const Home = () => {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                <MenuItem onClick={handleCloseUserMenu}>
+                <MenuItem onClick={handleLogout}>
                   <Typography textAlign="center">Logout</Typography>
                 </MenuItem>
               </Menu>
@@ -117,18 +104,28 @@ const Home = () => {
 
 
       <Center>
-        <Card sx={{ width: 400, m:2 }}>
+        <Card sx={{ width: 500, m: 2 }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Typography variant="h5" sx={{ my: 3 }}>
               Pets
             </Typography>
+            <Button variant="contained" sx={{ my: 3 }}>Add Pet</Button>
           </CardContent>
-          <CardContent sx={{ textAlign: 'center' }}>
-                
+          <CardContent sx={{ textAlign: 'left' }}>
+            {pets.map(pets => {
+              return (
+                <div className='post'>
+                  <h3>{pets.petname}</h3>
+                  <p>{pets.type}</p>
+                  <Button variant="contained" sx={{ my: 3 }}>Remove</Button>
+                </div>
+              )
+            })}
           </CardContent>
         </Card>
 
-        <Card sx={{ width: 400, m:2 }}>
+
+        <Card sx={{ m: 2 }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Typography variant="h5" sx={{ my: 3 }}>
               Treatments
@@ -136,7 +133,7 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        <Card sx={{ width: 400, m:2 }}>
+        <Card sx={{ m: 2 }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Typography variant="h5" sx={{ my: 3 }}>
               Offered Procedures

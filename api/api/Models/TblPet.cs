@@ -10,11 +10,10 @@ namespace api.Models
         {
             TblTreatments = new HashSet<TblTreatment>();
         }
-
-        public string Petname { get; set; } = null!;
         public int Ownerid { get; set; }
+        public string Petname { get; set; } = null!;
         public string? Type { get; set; }
-        public virtual TblOwner Owner { get; set; } = null!;
+
         [JsonIgnore]
         public virtual ICollection<TblTreatment> TblTreatments { get; set; }
     }

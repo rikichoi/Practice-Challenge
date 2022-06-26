@@ -1,10 +1,10 @@
 import React, {useContext} from 'react'
 import { Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { Box } from '@mui/system'
-import Center from './Center'
+import Center from './Center';
 import useForm from '../hooks/useForm'
 import { useNavigate } from 'react-router'
-import axios from 'axios'
+import axios from 'axios';
 import {LoginContext} from '../helper/Context';
 
 const getFreshModel = () => ({

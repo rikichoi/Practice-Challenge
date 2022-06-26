@@ -32,22 +32,30 @@ namespace api.Controllers
         }
 
         // GET: api/TblPets/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TblPet>> GetTblPet(string id)
+        [HttpGet("Pets/{userID}")]
+    public async Task<ActionResult<List<TblPet?>>> GetUserPets()
         {
-          if (_context.TblPets == null)
-          {
-              return NotFound();
-          }
-            var tblPet = await _context.TblPets.FindAsync(id);
+        
+        try
+        {
+            var inputOwnerID = Convert.ToInt32(RouteData.Values["userID"]);
 
-            if (tblPet == null)
-            {
-                return NotFound();
-            }
+            var owneridArray = new List<int> { inputOwnerID };
 
-            return tblPet;
+            var ownerPetsObject = await _context.TblPets
+            .Where(t => owneridArray.Contains(t.Ownerid)).ToListAsync();
+
+
+            return Ok (new {ownerPetsObject});
         }
+        catch (Exception ex)
+        {
+
+            return StatusCode(500, ex.ToString());
+        }
+
+    }
+
 
         // PUT: api/TblPets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -82,24 +90,14 @@ namespace api.Controllers
 
         // POST: api/TblPets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
-        public async Task<ActionResult<TblPet>> PostTblPet(TblPet tblPet)
+        public async Task<ActionResult<List<TblPet>>> AddHero(TblPet pet)
         {
+            _context.TblPets.Add(pet);
+            await _context.SaveChangesAsync();
 
-            var temp = _context.TblPets
-                .Where(x => x.Ownerid == tblPet.Ownerid
-                && x.Petname == tblPet.Petname && x.Type == tblPet.Type)
-                .FirstOrDefault();
-
-            if (temp == null)
-            {
-                _context.TblPets.Add(tblPet);
-                await _context.SaveChangesAsync();
-            }
-            else
-                tblPet = temp;
-
-            return Ok(tblPet);
+            return Ok(await _context.TblPets.ToListAsync());
         }
 
         // DELETE: api/TblPets/5
