@@ -1,6 +1,6 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
-import { Button, Card, CardContent, Typography } from '@mui/material'
+import { Button, Card, CardContent, Typography, TextField } from '@mui/material'
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -14,7 +14,7 @@ import Center from './Center';
 import { LoginContext } from '../helper/Context';
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { DataGrid } from '@mui/x-data-grid';
+
 
 const Home = () => {
 
@@ -39,6 +39,7 @@ const Home = () => {
 
 
   const [pets, setPets] = useState([]);
+  const [updated, setUpdated] = useState(false);
 
 
   useEffect(() => {
@@ -47,7 +48,16 @@ const Home = () => {
         setPets(resp.data.ownerPetsObject);
       }
       )
-  }, [userID]);
+  }, [userID, updated]);
+
+  const [toggle, setToggle] = useState(false);
+
+  const [petname, setPetname] = useState("");
+
+  const [type, setType] = useState("");
+
+
+  
 
   return (
     <>
@@ -109,7 +119,38 @@ const Home = () => {
             <Typography variant="h5" sx={{ my: 3 }}>
               Pets
             </Typography>
-            <Button variant="contained" sx={{ my: 3 }}>Add Pet</Button>
+            <Button onClick={() => setToggle(!toggle)} variant="contained" sx={{ my: 3 }}>Add Pet</Button>
+            {toggle && (
+              <div>
+              <TextField
+              sx={{ marginRight: 1 }}
+                label="Pet Name"
+                name="petname"
+                type='petname'
+                value={petname}
+                onChange={(e) => {
+                  setPetname(e.target.value); }}
+                variant="outlined"/>
+                <TextField
+                sx={{ marginLeft: 1 }}
+                label="Type"
+                name="type"
+                type='type'
+                value={type}
+                onChange={(e) => {
+                  setType(e.target.value); }}
+                variant="outlined"/>
+                <Button onClick={() => ( setUpdated(!updated),
+                axios.post(`https://localhost:7162/api/TblPets`, {
+                  ownerid : userID,
+                  petname : petname,
+                  type : type
+                }).then(resp => console.log(resp).catch(err => console.log(err))))} 
+                variant="contained" sx={{ marginRight: 3, my:3 }} color="success">Submit</Button>
+                <Button onClick={() => (setToggle(!toggle), setPetname(""), setType(""))} 
+                variant="contained" sx={{ marginLeft: 3, my:3 }} color="error">Close</Button>
+                </div>
+            )}
           </CardContent>
           <CardContent sx={{ textAlign: 'left' }}>
             {pets.map(pets => {
@@ -117,7 +158,10 @@ const Home = () => {
                 <div className='post'>
                   <h3>{pets.petname}</h3>
                   <p>{pets.type}</p>
-                  <Button variant="contained" sx={{ my: 3 }}>Remove</Button>
+                  <Button variant="contained" sx={{ my: 3 }} color="error"
+                  onClick={() => (setUpdated(!updated),
+                    axios.delete(`https://localhost:7162/api/TblPets/${pets.petname}/${pets.ownerid}`).then(resp => console.log(resp).catch(err => console.log(err))))} 
+                    >Remove</Button>
                 </div>
               )
             })}

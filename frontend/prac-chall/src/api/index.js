@@ -4,6 +4,7 @@ export const BASE_URL = 'https://localhost:7162/';
 
 export const ENDPOINTS = {
     TblOwners: 'TblOwners',
+    TblPets: 'TblPets',
 }
 
 export const createAPIEndpoint = endpoint => {
